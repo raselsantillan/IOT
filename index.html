@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IoT Fire Detection System Presentation</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Custom Fonts */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Orbitron:wght@500;700;900&display=swap');
+
+        :root {
+            --maroon: #800000;
+            --gold: #FFD700;
+            --dark-bg: #0f172a;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #000;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: white;
+        }
+
+        /* 16:9 Container */
+        #presentation-container {
+            width: 100vw;
+            max-width: 177.78vh; /* 16/9 = 1.7778 */
+            height: 56.25vw; /* 9/16 = 0.5625 */
+            max-height: 100vh;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 50px rgba(0,0,0,0.5);
+            perspective: 1000px;
+        }
+
+        /* Slide Styles */
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            padding: 4rem;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+            pointer-events: none;
+        }
+
+        .slide.active {
+            opacity: 1;
+            transform: translateX(0);
+            pointer-events: all;
+            z-index: 10;
+        }
+
+        .slide.previous {
+            opacity: 0;
+            transform: translateX(-100%) scale(0.9);
+            z-index: 5;
+        }
+
+        /* Typography */
+        h1, h2, h3 {
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        .gradient-text {
+            background: linear-gradient(to right, #60a5fa, #a855f7);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .maroon-text {
+            color: var(--maroon);
+        }
+
+        /* Animations */
+        .animate-in {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+        }
+
+        .slide.active .animate-in {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Delay classes for staggered animation */
+        .delay-100 { transition-delay: 100ms; }
+        .delay-200 { transition-delay: 200ms; }
+        .delay-300 { transition-delay: 300ms; }
+        .delay-400 { transition-delay: 400ms; }
+        .delay-500 { transition-delay: 500ms; }
+        .delay-700 { transition-delay: 700ms; }
+
+        /* Hardware Component Card */
+        .component-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s;
+        }
+        .component-card:hover {
+            transform: translateY(-5px);
+            border-color: #60a5fa;
+        }
+
+        /* Flowchart Connector Animation */
+        .flow-line {
+            stroke-dasharray: 20;
+            animation: dash 1s linear infinite;
+        }
+        @keyframes dash {
+            to { stroke-dashoffset: -40; }
+        }
+
+        /* Floating particles background */
+        .particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: float 20s infinite linear;
+        }
+        @keyframes float {
+            0% { transform: translateY(0) translateX(0); opacity: 0; }
+            50% { opacity: 0.5; }
+            100% { transform: translateY(-100vh) translateX(50px); opacity: 0; }
+        }
+
+        /* Navigation Controls */
+        .nav-btn {
+            position: absolute;
+            bottom: 2rem;
+            z-index: 50;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.75rem 1.25rem;
+            border-radius: 9999px;
+            backdrop-filter: blur(5px);
+            transition: background 0.2s;
+            cursor: pointer;
+        }
+        .nav-btn:hover { background: rgba(255, 255, 255, 0.2); }
+        #prev-btn { right: 5.5rem; }
+        #next-btn { right: 2rem; }
+        
+        /* Last slide navigation positioning */
+        body:has(#slide-10.active) #prev-btn { right: auto; left: 2rem; }
+        body:has(#slide-10.active) #next-btn { right: auto; left: 4rem; }
+
+        /* Progress Bar */
+        #progress-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 4px;
+            background: linear-gradient(to right, #3b82f6, #8b5cf6);
+            width: 0%;
+            transition: width 0.5s ease;
+            z-index: 50;
+        }
+        
+        .pulse-ring {
+            animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+        }
+        
+        @keyframes pulse-ring {
+            0% { transform: scale(0.33); opacity: 1; }
+            80%, 100% { transform: scale(2); opacity: 0; }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="presentation-container">
+        <!-- Dynamic Background Particles -->
+        <div id="particles"></div>
+
+        <!-- Slide 1: Title Slide -->
+        <div class="slide active" id="slide-1">
+            <div class="absolute top-8 left-8 flex items-center gap-4 animate-in">
+                <div class="flex items-center gap-2">
+                    <img src="MARSU-logo-browser.png" alt="Marinduque State University" class="w-12 h-12 rounded-full border border-white/20">
+                    <img src="cics logo.png" alt="College of Information and Computing Sciences" class="w-12 h-12 rounded-full border border-white/20">
+                </div>
+                <div class="text-left">
+                    <h3 class="text-sm uppercase tracking-widest text-gray-400">Marinduque State University</h3>
+                    <p class="text-xs text-gray-500">College of Information and Computing Sciences</p>
+                </div>
+            </div>
+
+            <div class="flex-1 flex flex-col justify-center items-center text-center z-10">
+                <div class="mb-4 animate-in delay-100">
+                    <span class="bg-blue-900/50 border border-blue-500/30 text-blue-300 px-4 py-1 rounded-full text-sm font-mono">ITE 104: Elective 4 (IoT)</span>
+                </div>
+                <div class="relative animate-in delay-200">
+                    <div class="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-500/20 blur-3xl rounded-full"></div>
+                    <h1 class="relative text-5xl md:text-6xl font-black mb-8 leading-tight">
+                        <span class="block text-white/90 tracking-wide">IoT-based</span>
+                        <span class="block bg-gradient-to-r from-blue-400 via-cyan-400 to-purple-400 bg-clip-text text-transparent font-black tracking-wider">Smoke Detection &</span>
+                        <span class="block bg-gradient-to-r from-orange-400 via-red-400 to-pink-400 bg-clip-text text-transparent font-black tracking-wider">Fire Alarm System</span>
+                    </h1>
+                </div>
+                <p class="text-lg text-gray-400 max-w-2xl animate-in delay-300">
+                    Proactive safety through smart sensing, real-time connectivity, and automated response.
+                </p>
+                <div class="mt-12 flex gap-8 animate-in delay-400">
+                    <div class="text-center">
+                        <div class="w-12 h-12 bg-red-500/20 rounded-lg flex items-center justify-center mx-auto mb-2 text-red-400">
+                            <i class="fas fa-fire-extinguisher text-xl"></i>
+                        </div>
+                        <span class="text-sm text-gray-400">Early Detection</span>
+                    </div>
+                    <div class="text-center">
+                        <div class="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center mx-auto mb-2 text-blue-400">
+                            <i class="fas fa-wifi text-xl"></i>
+                        </div>
+                        <span class="text-sm text-gray-400">Real-time WiFi</span>
+                    </div>
+                    <div class="text-center">
+                        <div class="w-12 h-12 bg-green-500/20 rounded-lg flex items-center justify-center mx-auto mb-2 text-green-400">
+                            <i class="fas fa-robot text-xl"></i>
+                        </div>
+                        <span class="text-sm text-gray-400">Automation</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="absolute bottom-8 left-8 animate-in delay-500">
+                <p class="text-sm text-gray-500">Presented by Group B</p>
+            </div>
+        </div>
+
+        <!-- Slide 2: Introduction & Problem -->
+        <div class="slide" id="slide-2">
+            <h2 class="text-4xl font-bold mb-12 border-l-4 border-blue-500 pl-4 animate-in">Introduction</h2>
+            
+            <div class="grid grid-cols-2 gap-12 h-full pb-20">
+                <div class="flex flex-col justify-center gap-8">
+                    <div class="animate-in delay-100 bg-white/5 p-6 rounded-xl border-l-4 border-yellow-500">
+                        <h3 class="text-2xl font-bold mb-2 flex items-center gap-3">
+                            <i class="fas fa-network-wired text-yellow-500"></i> The Concept
+                        </h3>
+                        <p class="text-gray-300 leading-relaxed">
+                            "Imagine if every object in your house communicates like a person... not with words, but with data."
+                            IoT gives physical objects a <strong>digital voice</strong>.
+                        </p>
+                    </div>
+
+                    <div class="animate-in delay-200 bg-white/5 p-6 rounded-xl border-l-4 border-red-500">
+                        <h3 class="text-2xl font-bold mb-2 flex items-center gap-3">
+                            <i class="fas fa-exclamation-triangle text-red-500"></i> The Problem
+                        </h3>
+                        <ul class="list-disc pl-5 text-gray-300 space-y-2">
+                            <li>Fires spread quickly and silently.</li>
+                            <li>Traditional alarms are often local-only (no remote alert).</li>
+                            <li>Delayed response leads to devastating damage.</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="relative flex items-center justify-center animate-in delay-300">
+                    <!-- Visual Illustration -->
+                    <div class="relative w-full aspect-video bg-gradient-to-br from-gray-800 via-gray-900 to-black rounded-lg overflow-hidden border border-gray-700 shadow-2xl">
+                        <!-- Smoke Detector Illustration -->
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <div class="relative">
+                                <!-- Smoke Detector Body -->
+                                <div class="w-48 h-48 bg-gradient-to-b from-gray-300 to-gray-400 rounded-full shadow-2xl border-4 border-gray-500">
+                                    <!-- Center LED -->
+                                    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 bg-red-500 rounded-full animate-pulse shadow-lg">
+                                        <div class="w-full h-full bg-red-400 rounded-full animate-ping"></div>
+                                    </div>
+                                    <!-- Vent Holes -->
+                                    <div class="absolute top-8 left-1/2 -translate-x-1/2 w-32 h-2 flex gap-2">
+                                        <div class="flex-1 h-full bg-gray-600 rounded"></div>
+                                        <div class="flex-1 h-full bg-gray-600 rounded"></div>
+                                        <div class="flex-1 h-full bg-gray-600 rounded"></div>
+                                        <div class="flex-1 h-full bg-gray-600 rounded"></div>
+                                    </div>
+                                    <div class="absolute bottom-8 left-1/2 -translate-x-1/2 w-32 h-2 flex gap-2">
+                                        <div class="flex-1 h-full bg-gray-600 rounded"></div>
+                                        <div class="flex-1 h-full bg-gray-600 rounded"></div>
+                                        <div class="flex-1 h-full bg-gray-600 rounded"></div>
+                                        <div class="flex-1 h-full bg-gray-600 rounded"></div>
+                                    </div>
+                                </div>
+                                <!-- WiFi Signals -->
+                                <div class="absolute -top-4 right-4">
+                                    <div class="w-2 h-8 bg-blue-400 rounded-full animate-pulse opacity-60"></div>
+                                    <div class="w-2 h-6 bg-blue-400 rounded-full animate-pulse opacity-40" style="animation-delay: 0.2s"></div>
+                                    <div class="w-2 h-4 bg-blue-400 rounded-full animate-pulse opacity-20" style="animation-delay: 0.4s"></div>
+                                </div>
+                                <!-- Smoke Particles -->
+                                <div class="absolute -bottom-8 left-1/2 -translate-x-1/2 flex gap-2">
+                                    <div class="w-4 h-4 bg-gray-300 rounded-full opacity-30 animate-bounce" style="animation-delay: 0s"></div>
+                                    <div class="w-3 h-3 bg-gray-400 rounded-full opacity-40 animate-bounce" style="animation-delay: 0.3s"></div>
+                                    <div class="w-5 h-5 bg-gray-200 rounded-full opacity-20 animate-bounce" style="animation-delay: 0.6s"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex flex-col justify-end p-8">
+                            <h4 class="text-xl font-bold text-white mb-2">The Solution</h4>
+                            <p class="text-sm text-gray-300">An integrated IoT smoke detection system that continuously monitors for fire hazards, automatically triggers safety responses, and sends instant alerts to keep you protected 24/7.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: Objectives -->
+        <div class="slide" id="slide-3">
+            <h2 class="text-4xl font-bold mb-8 border-l-4 border-purple-500 pl-4 animate-in">Project Objectives</h2>
+            
+            <div class="bg-gradient-to-r from-purple-900/40 to-blue-900/40 p-8 rounded-2xl border border-purple-500/30 mb-8 animate-in delay-100 text-center">
+                <h3 class="text-2xl font-bold text-purple-300 mb-2">Main Goal</h3>
+                <p class="text-lg text-gray-200">
+                    To improve safety in homes and offices using smart sensors that detect early fire signs and alert users immediately, preventing small incidents from becoming emergencies.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-3 gap-6 animate-in delay-200">
+                <div class="component-card p-6 rounded-xl">
+                    <div class="w-12 h-12 bg-red-500 rounded-full flex items-center justify-center mb-4 text-white font-bold text-xl">1</div>
+                    <h4 class="text-xl font-bold mb-2">Early Detection</h4>
+                    <p class="text-sm text-gray-400">Monitor smoke, gas (MQ-2), and light intensity (LDR) to detect hazards instantly.</p>
+                </div>
+                
+                <div class="component-card p-6 rounded-xl">
+                    <div class="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center mb-4 text-white font-bold text-xl">2</div>
+                    <h4 class="text-xl font-bold mb-2">Smart Alerts</h4>
+                    <p class="text-sm text-gray-400">Send automatic notifications to smartphones via Cloud, even when users are off-site.</p>
+                </div>
+
+                <div class="component-card p-6 rounded-xl">
+                    <div class="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center mb-4 text-white font-bold text-xl">3</div>
+                    <h4 class="text-xl font-bold mb-2">Auto Response</h4>
+                    <p class="text-sm text-gray-400">Trigger local alarms (Buzzer) and simulate safety measures (Water Valve Servo).</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4: Hardware Architecture -->
+        <div class="slide" id="slide-4">
+            <h2 class="text-4xl font-bold mb-6 border-l-4 border-green-500 pl-4 animate-in">Hardware Architecture</h2>
+            
+            <div class="flex gap-8 h-full pb-16">
+                <!-- Main Board -->
+                <div class="w-1/3 flex flex-col justify-center animate-in delay-100">
+                    <div class="bg-gray-800 p-8 rounded-2xl border-2 border-green-500 shadow-lg relative">
+                        <div class="absolute -top-3 left-6 bg-green-500 text-black px-3 py-1 text-xs font-bold rounded">CORE</div>
+                        <i class="fas fa-microchip text-6xl text-gray-400 mb-4 block text-center"></i>
+                        <h3 class="text-2xl font-bold text-center text-white">ESP32 DevKit C</h3>
+                        <p class="text-center text-gray-400 text-sm mt-2">Wi-Fi enabled microcontroller. Processes sensor logic and cloud communication.</p>
+                    </div>
+                </div>
+
+                <!-- Peripherals -->
+                <div class="w-2/3 grid grid-cols-2 gap-4 content-center">
+                    <!-- Sensors -->
+                    <div class="bg-white/5 p-4 rounded-lg border border-white/10 flex items-center gap-4 animate-in delay-200">
+                        <i class="fas fa-smog text-3xl text-gray-400"></i>
+                        <div>
+                            <h4 class="font-bold">MQ-2 Gas Sensor</h4>
+                            <p class="text-xs text-gray-400">Detects Smoke & LPG (GPIO 14)</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-white/5 p-4 rounded-lg border border-white/10 flex items-center gap-4 animate-in delay-300">
+                        <i class="fas fa-sun text-3xl text-yellow-400"></i>
+                        <div>
+                            <h4 class="font-bold">LDR / Flame Sensor</h4>
+                            <p class="text-xs text-gray-400">Light Intensity (GPIO 34)</p>
+                        </div>
+                    </div>
+
+                    <!-- Actuators -->
+                    <div class="bg-white/5 p-4 rounded-lg border border-white/10 flex items-center gap-4 animate-in delay-400">
+                        <i class="fas fa-volume-up text-3xl text-red-400"></i>
+                        <div>
+                            <h4 class="font-bold">Buzzer & LEDs</h4>
+                            <p class="text-xs text-gray-400">Audible & Visual Alerts</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-white/5 p-4 rounded-lg border border-white/10 flex items-center gap-4 animate-in delay-500">
+                        <i class="fas fa-faucet text-3xl text-blue-400"></i>
+                        <div>
+                            <h4 class="font-bold">Servo Motor</h4>
+                            <p class="text-xs text-gray-400">Simulates Water Valve (GPIO 2)</p>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white/5 p-4 rounded-lg border border-white/10 flex items-center gap-4 animate-in delay-500">
+                        <i class="fas fa-toggle-on text-3xl text-orange-400"></i>
+                        <div>
+                            <h4 class="font-bold">Relay Module</h4>
+                            <p class="text-xs text-gray-400">Controls High Power Devices (GPIO 26)</p>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white/5 p-4 rounded-lg border border-white/10 flex items-center gap-4 animate-in delay-500">
+                         <i class="fas fa-tv text-3xl text-purple-400"></i>
+                        <div>
+                            <h4 class="font-bold">OLED Display (SH1107)</h4>
+                            <p class="text-xs text-gray-400">Real-time Status (I2C)</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5: Circuit Diagram -->
+        <div class="slide" id="slide-5">
+            <h2 class="text-4xl font-bold mb-2 border-l-4 border-orange-500 pl-4 animate-in">Circuit Diagram</h2>
+            
+            <div class="flex flex-col items-center justify-center h-full">
+                <div class="relative max-w-3xl w-full animate-in delay-100">
+                    <div class="bg-gray-900/50 p-8 rounded-2xl border border-orange-500/30 backdrop-blur-sm">
+                        <div class="flex justify-center items-center">
+                            <img src="circuit.png" alt="Circuit Diagram" class="max-w-full max-h-[55vh] object-contain rounded-lg shadow-2xl">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 6: Software Workflow -->
+        <div class="slide" id="slide-6">
+            <h2 class="text-4xl font-bold mb-8 border-l-4 border-cyan-500 pl-4 animate-in">Software Logic Flow</h2>
+            
+            <div class="flex items-center justify-between h-64 mt-12 px-8 relative animate-in delay-200">
+                
+                <!-- Step 1 -->
+                <div class="relative w-48 p-4 bg-gray-800 border border-gray-600 rounded-lg text-center z-10">
+                    <div class="absolute -top-4 left-1/2 -translate-x-1/2 bg-gray-600 text-xs px-2 py-1 rounded">Input</div>
+                    <i class="fas fa-satellite-dish text-3xl mb-2 text-cyan-400"></i>
+                    <h4 class="font-bold">Read Sensors</h4>
+                    <p class="text-xs text-gray-400">MQ-2 & LDR Data Acquisition</p>
+                </div>
+
+                <!-- Arrow -->
+                <div class="flex-1 h-1 bg-gray-700 relative mx-2">
+                    <div class="absolute right-0 -top-0.5 w-3 h-3 border-t-2 border-r-2 border-gray-700 rotate-45"></div>
+                </div>
+
+                <!-- Step 2 -->
+                <div class="relative w-48 p-4 bg-blue-900 border border-blue-600 rounded-lg text-center z-10 shadow-[0_0_20px_rgba(37,99,235,0.3)]">
+                    <div class="absolute -top-4 left-1/2 -translate-x-1/2 bg-blue-600 text-xs px-2 py-1 rounded">Processing</div>
+                    <i class="fas fa-microchip text-3xl mb-2 text-white"></i>
+                    <h4 class="font-bold">ESP32 Logic</h4>
+                    <p class="text-xs text-blue-200">Compare with Thresholds (Safe vs. Fire)</p>
+                </div>
+
+                <!-- Arrow -->
+                <div class="flex-1 h-1 bg-gray-700 relative mx-2">
+                    <div class="absolute right-0 -top-0.5 w-3 h-3 border-t-2 border-r-2 border-gray-700 rotate-45"></div>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="relative w-48 p-4 bg-red-900 border border-red-600 rounded-lg text-center z-10">
+                    <div class="absolute -top-4 left-1/2 -translate-x-1/2 bg-red-600 text-xs px-2 py-1 rounded">Action</div>
+                    <i class="fas fa-bell text-3xl mb-2 text-red-400 animate-pulse"></i>
+                    <h4 class="font-bold">Trigger Alert</h4>
+                    <p class="text-xs text-red-200">Buzzer ON, Valve OPEN, App Notify</p>
+                </div>
+            </div>
+
+            <div class="mt-12 grid grid-cols-2 gap-8 animate-in delay-500">
+                <div class="bg-white/5 p-4 rounded-lg flex items-center gap-4">
+                    <i class="fas fa-wifi text-2xl text-gray-400"></i>
+                    <p class="text-sm">Data sent via MQTT/HTTP/WebSocket to Cloud Dashboard.</p>
+                </div>
+                <div class="bg-white/5 p-4 rounded-lg flex items-center gap-4">
+                    <i class="fas fa-mobile-alt text-2xl text-gray-400"></i>
+                    <p class="text-sm">User can manually "Set Safe" or "Set Fire Alert" from the App.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 7: UI Demo -->
+        <div class="slide" id="slide-7">
+            <h2 class="text-4xl font-bold mb-4 border-l-4 border-pink-500 pl-4 animate-in">User Interface</h2>
+            
+            <div class="flex justify-center gap-12 items-center h-full pb-12">
+                
+                <!-- Phone Mockup -->
+                <div class="relative w-64 h-[500px] bg-black border-4 border-gray-700 rounded-[2rem] shadow-2xl overflow-hidden animate-in delay-200">
+                    <!-- Screen -->
+                    <div class="w-full h-full bg-gray-900 flex flex-col p-4 pt-8">
+                        <div class="flex justify-between items-center mb-6">
+                            <i class="fas fa-bars text-gray-400"></i>
+                            <span class="text-xs font-bold">IoT Fire System</span>
+                            <i class="fas fa-cog text-gray-400"></i>
+                        </div>
+
+                        <!-- Status Card -->
+                        <div class="bg-green-600 rounded-xl p-6 mb-4 shadow-lg text-center relative overflow-hidden group">
+                            <div class="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-20 transition"></div>
+                            <i class="fas fa-shield-alt text-4xl mb-2 text-white"></i>
+                            <h3 class="text-xl font-bold text-white">ALL CLEAR</h3>
+                            <p class="text-xs text-green-200">System Monitoring Active</p>
+                        </div>
+
+                        <!-- Data Cards -->
+                        <div class="grid grid-cols-2 gap-3 mb-4">
+                            <div class="bg-gray-800 p-3 rounded-xl border border-gray-700">
+                                <span class="text-xs text-gray-400 block">Smoke (PPM)</span>
+                                <span class="text-2xl font-bold text-blue-400">213</span>
+                            </div>
+                            <div class="bg-gray-800 p-3 rounded-xl border border-gray-700">
+                                <span class="text-xs text-gray-400 block">Light (Lux)</span>
+                                <span class="text-2xl font-bold text-yellow-400">368</span>
+                            </div>
+                        </div>
+
+                        <!-- Controls -->
+                        <div class="bg-gray-800 p-4 rounded-xl border border-gray-700 mt-auto">
+                            <h4 class="text-xs text-gray-400 mb-3">MANUAL OVERRIDE</h4>
+                            <div class="flex gap-2">
+                                <button class="flex-1 bg-green-500/20 text-green-400 py-2 rounded text-xs border border-green-500/50">Safe</button>
+                                <button class="flex-1 bg-red-500/20 text-red-400 py-2 rounded text-xs border border-red-500/50">Fire Alert</button>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Dynamic Island/Notch -->
+                    <div class="absolute top-2 left-1/2 -translate-x-1/2 w-20 h-5 bg-black rounded-full z-20"></div>
+                </div>
+
+                <!-- Description -->
+                <div class="w-1/3 space-y-6 animate-in delay-400">
+                    <div class="flex items-start gap-4">
+                        <div class="bg-pink-500/20 p-3 rounded-lg"><i class="fas fa-eye text-pink-400"></i></div>
+                        <div>
+                            <h4 class="font-bold text-lg">Real-time Visibility</h4>
+                            <p class="text-sm text-gray-400">Instant readouts of Gas Concentration and Light Intensity.</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-4">
+                        <div class="bg-pink-500/20 p-3 rounded-lg"><i class="fas fa-toggle-on text-pink-400"></i></div>
+                        <div>
+                            <h4 class="font-bold text-lg">Remote Control</h4>
+                            <p class="text-sm text-gray-400">Manual override switches to open valves or reset alarms from anywhere.</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-4">
+                        <div class="bg-pink-500/20 p-3 rounded-lg"><i class="fas fa-history text-pink-400"></i></div>
+                        <div>
+                            <h4 class="font-bold text-lg">Event Logs</h4>
+                            <p class="text-sm text-gray-400">History of "Fire Detected" or "Valve Opened" events for diagnostics.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 8: Application Screenshots -->
+        <div class="slide" id="slide-8">
+            <h2 class="text-4xl font-bold mb-8 border-l-4 border-indigo-500 pl-4 animate-in">Application Screenshots</h2>
+            
+            <div class="flex flex-col items-center justify-center h-full pb-16">
+                <div class="grid grid-cols-2 gap-6 max-w-5xl w-full">
+                    <!-- Desktop Screenshot -->
+                    <div class="flex flex-col items-center animate-in delay-200">
+                        <div class="bg-gray-800 p-4 rounded-2xl border border-gray-600 shadow-2xl">
+                            <div class="bg-gray-900 rounded-lg overflow-hidden">
+                                <img src="desktop.png" alt="Desktop Application" class="w-full h-auto max-h-96 object-contain">
+                            </div>
+                        </div>
+                        <h3 class="text-xl font-bold mt-4 text-indigo-400">Web Dashboard</h3>
+                        <p class="text-sm text-gray-400 text-center mt-2">Full-featured web interface for monitoring and control</p>
+                    </div>
+
+                    <!-- Mobile Screenshot -->
+                    <div class="flex flex-col items-center animate-in delay-300">
+                        <div class="bg-gray-800 p-4 rounded-2xl border border-gray-600 shadow-2xl">
+                            <div class="bg-gray-900 rounded-lg overflow-hidden">
+                                <img src="mobile.png" alt="Mobile Application" class="w-full h-auto max-h-96 object-contain">
+                            </div>
+                        </div>
+                        <h3 class="text-xl font-bold mt-4 text-indigo-400">Mobile Application</h3>
+                        <p class="text-sm text-gray-400 text-center mt-2">Responsive design for on-the-go monitoring</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 9: Conclusion -->
+        <div class="slide" id="slide-9">
+            <div class="flex flex-col items-center justify-center h-full text-center px-20">
+                <i class="fas fa-check-circle text-6xl text-green-500 mb-8 animate-in"></i>
+                <h2 class="text-5xl font-bold mb-8 animate-in delay-100">Conclusion</h2>
+                <p class="text-2xl text-gray-300 leading-relaxed max-w-4xl animate-in delay-200">
+                    "Through the integration of early detection, automated notifications, and advanced data processing, this IoT device provides an effective and reliable approach to addressing fire hazards."
+                </p>
+                <div class="mt-12 p-6 border border-white/10 bg-white/5 rounded-xl animate-in delay-300">
+                    <p class="font-orbitron tracking-widest text-lg text-blue-400">SAFETY THROUGH INNOVATION</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 10: Team -->
+        <div class="slide" id="slide-10">
+            <h2 class="text-4xl font-bold mb-8 border-l-4 border-yellow-500 pl-4 animate-in">The Team (Group B)</h2>
+            
+            <div class="grid grid-cols-2 gap-8 text-lg animate-in delay-100">
+                <div class="space-y-3">
+                    <div class="flex items-center gap-3 p-2 bg-white/5 rounded-lg"><div class="w-2 h-2 bg-yellow-500 rounded-full"></div> Rasel N. Santillan</div>
+                    <div class="flex items-center gap-3 p-2 bg-white/5 rounded-lg"><div class="w-2 h-2 bg-yellow-500 rounded-full"></div> Eruz Kin S. Sartillo</div>
+                    <div class="flex items-center gap-3 p-2 bg-white/5 rounded-lg"><div class="w-2 h-2 bg-yellow-500 rounded-full"></div> Ian O. Sartillo</div>
+                    <div class="flex items-center gap-3 p-2 bg-white/5 rounded-lg"><div class="w-2 h-2 bg-yellow-500 rounded-full"></div> Rhizzaldy Lean L. Mogol</div>
+                    <div class="flex items-center gap-3 p-2 bg-white/5 rounded-lg"><div class="w-2 h-2 bg-yellow-500 rounded-full"></div> Angelica Mae F. Quijano</div>
+                    <div class="flex items-center gap-3 p-2 bg-white/5 rounded-lg"><div class="w-2 h-2 bg-yellow-500 rounded-full"></div> Thrisha Garzon</div>
+                    <div class="flex items-center gap-3 p-2 bg-white/5 rounded-lg"><div class="w-2 h-2 bg-yellow-500 rounded-full"></div> Kyla Malitao</div>
+                </div>
+                <div class="space-y-3">
+                    <div class="flex items-center gap-3 p-2 bg-white/5 rounded-lg"><div class="w-2 h-2 bg-yellow-500 rounded-full"></div> Chris Daniel A. Muhi</div>
+                    <div class="flex items-center gap-3 p-2 bg-white/5 rounded-lg"><div class="w-2 h-2 bg-yellow-500 rounded-full"></div> Jack Robert O. Baguion</div>
+                    <div class="flex items-center gap-3 p-2 bg-white/5 rounded-lg"><div class="w-2 h-2 bg-yellow-500 rounded-full"></div> John Howard S. Pros</div>
+                    <div class="flex items-center gap-3 p-2 bg-white/5 rounded-lg"><div class="w-2 h-2 bg-yellow-500 rounded-full"></div> Jonvic M. Monponbanua</div>
+                    <div class="flex items-center gap-3 p-2 bg-white/5 rounded-lg"><div class="w-2 h-2 bg-yellow-500 rounded-full"></div> Eldrian C. Lining</div>
+                    <div class="flex items-center gap-3 p-2 bg-white/5 rounded-lg"><div class="w-2 h-2 bg-yellow-500 rounded-full"></div> Vincent Brian L. Marquez</div>
+                    <div class="flex items-center gap-3 p-2 bg-white/5 rounded-lg"><div class="w-2 h-2 bg-yellow-500 rounded-full"></div> Junia P. Villavicencio</div>
+                </div>
+            </div>
+            
+            <div class="absolute bottom-12 right-12 animate-in delay-300 text-right">
+                <p class="text-gray-500 text-sm">Course Teacher</p>
+                <h4 class="text-xl font-bold">Jayvi M. Mandalihan, CpE, LPT</h4>
+            </div>
+        </div>
+
+        <!-- Controls -->
+        <button id="prev-btn" class="nav-btn text-white opacity-50 hover:opacity-100">
+            <i class="fas fa-chevron-left"></i>
+        </button>
+        <button id="next-btn" class="nav-btn text-white hover:text-blue-400" style="margin-left: 2rem;">
+            <i class="fas fa-chevron-right"></i>
+        </button>
+        <div id="progress-bar"></div>
+    </div>
+
+    <script>
+        // Particle Background Logic
+        function createParticles() {
+            const container = document.getElementById('particles');
+            const particleCount = 30;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                
+                // Random positioning and sizing
+                const size = Math.random() * 4 + 1;
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                particle.style.left = `${Math.random() * 100}%`;
+                particle.style.top = `${Math.random() * 100}%`;
+                
+                // Random animation duration and delay
+                const duration = Math.random() * 20 + 10;
+                const delay = Math.random() * -20;
+                particle.style.animationDuration = `${duration}s`;
+                particle.style.animationDelay = `${delay}s`;
+                
+                container.appendChild(particle);
+            }
+        }
+
+        // Presentation Logic
+        let currentSlide = 1;
+        const totalSlides = 10;
+        
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const progressBar = document.getElementById('progress-bar');
+
+        function updateSlide() {
+            // Remove active/previous classes from all slides
+            document.querySelectorAll('.slide').forEach(slide => {
+                slide.classList.remove('active', 'previous');
+            });
+
+            // Set current slide active
+            const current = document.getElementById(`slide-${currentSlide}`);
+            current.classList.add('active');
+
+            // Set previous slide state for animation direction
+            if (currentSlide > 1) {
+                const prev = document.getElementById(`slide-${currentSlide - 1}`);
+                prev.classList.add('previous');
+            }
+
+            // Update Progress Bar
+            const progress = ((currentSlide - 1) / (totalSlides - 1)) * 100;
+            progressBar.style.width = `${progress}%`;
+
+            // Button visibility
+            prevBtn.style.opacity = currentSlide === 1 ? '0.3' : '1';
+            prevBtn.style.pointerEvents = currentSlide === 1 ? 'none' : 'all';
+            
+            nextBtn.innerHTML = currentSlide === totalSlides ? '<i class="fas fa-redo"></i>' : '<i class="fas fa-chevron-right"></i>';
+        }
+
+        function nextSlide() {
+            if (currentSlide < totalSlides) {
+                currentSlide++;
+            } else {
+                currentSlide = 1; // Loop back to start
+            }
+            updateSlide();
+        }
+
+        function prevSlide() {
+            if (currentSlide > 1) {
+                currentSlide--;
+                updateSlide();
+            }
+        }
+
+        // Event Listeners
+        nextBtn.addEventListener('click', nextSlide);
+        prevBtn.addEventListener('click', prevSlide);
+
+        // Keyboard Navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                nextSlide();
+            } else if (e.key === 'ArrowLeft') {
+                prevSlide();
+            }
+        });
+
+        // Initialize
+        createParticles();
+        updateSlide();
+
+    </script>
+</body>
+</html>
